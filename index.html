@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Memory Test</title>
+    <style>
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+
+        #number-display {
+            font-size: 48px;
+            margin: 20px 0;
+            min-height: 72px;
+        }
+
+        #input-container {
+            display: none;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 18px;
+            width: 200px;
+            margin: 10px;
+            text-align: center;
+            border-radius: 4px;
+            border: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: white;
+            border: none;
+            border-radius: 4px;
+            color: #2b87d1;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        #result {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+
+        #level {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Number Memory Test</h1>
+        <p style="margin-bottom: 20px;">Remember the number shown and type it correctly to advance to the next level. Each level adds one more digit!</p>
+        <div id="level">Level: 1</div>
+        <div id="number-display"></div>
+        <div id="timer-bar" style="width: 200px; height: 5px; background: #ccc; margin: 10px auto; display: none;">
+            <div id="timer-progress" style="width: 100%; height: 100%; background: #2ecc71;"></div>
+        </div>
+        <div id="input-container">
+            <input type="number" id="user-input" placeholder="Enter the number">
+            <br>
+            <button onclick="checkNumber()">Submit</button>
+        </div>
+        <button id="start-btn" onclick="startGame()">Start</button>
+        <div id="result"></div>
+    </div>
+    <script>
+        let currentNumber;
+        let currentLevel = 1;
+        let displayTime = 1000; // Starting display time in milliseconds
+
+        function generateNumber(level) {
+            const digits = level + 1;
+            const min = Math.pow(10, digits - 1);
+            const max = Math.pow(10, digits) - 1;
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function startGame() {
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('result').textContent = '';
+            document.getElementById('level').textContent = `Level: ${currentLevel}`;
+            document.getElementById('timer-bar').style.display = 'block';
+            
+            currentNumber = generateNumber(currentLevel);
+            document.getElementById('number-display').textContent = currentNumber;
+            
+            // Enhanced timer animation with color transition
+            const timerProgress = document.getElementById('timer-progress');
+            timerProgress.style.cssText = `
+                width: 100%;
+                height: 100%;
+                background: #2ecc71;
+                transition: width ${displayTime}ms linear, background ${displayTime}ms linear;
+            `;
+            
+            // Force reflow to restart the animation
+            timerProgress.offsetHeight;
+            
+            // Start animation keyframes
+            timerProgress.style.width = '0%';
+            timerProgress.style.background = '#e74c3c';
+
+            setTimeout(() => {
+                document.getElementById('number-display').textContent = '';
+                document.getElementById('input-container').style.display = 'block';
+                document.getElementById('user-input').value = '';
+                document.getElementById('user-input').focus();
+            }, displayTime);
+        }
+        // function to check the user's input
+        function checkNumber() {
+            const userInput = document.getElementById('user-input').value;
+            const resultDiv = document.getElementById('result');
+            document.getElementById('input-container').style.display = 'none';
+            
+            if (parseInt(userInput) === currentNumber) {
+                resultDiv.textContent = 'Correct! Moving to next level.';
+                currentLevel++;
+                displayTime += 1000; // Increase display time for each level
+                setTimeout(startGame, 1500);
+            } else {
+                resultDiv.textContent = `Game Over! The number was ${currentNumber}`;
+                document.getElementById('start-btn').style.display = 'block';
+                document.getElementById('start-btn').textContent = 'Play Again';
+                currentLevel = 1;
+                displayTime = 1000;
+            }
+            // Reset timer bar
+            const timerProgress = document.getElementById('timer-progress');
+            timerProgress.style.width = '100%';
+            timerProgress.style.background = '#2ecc71';
+        }
+
+        // Allow Enter key to submit
+        document.getElementById('user-input').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                checkNumber();
+            }
+        });
+    </script>
+</body>
+</html>
